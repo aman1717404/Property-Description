@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import lru_cache
-from typing import Iterator, List, Tuple
 from unittest.mock import patch
 
 import torch
@@ -22,7 +22,7 @@ MODEL_ID = "microsoft/Florence-2-large"
 TASK_PROMPT = "<MORE_DETAILED_CAPTION>"
 
 
-def _device_and_dtype() -> Tuple[str, torch.dtype]:
+def _device_and_dtype() -> tuple[str, torch.dtype]:
     if torch.cuda.is_available():
         return "cuda", torch.float16
     return "cpu", torch.float32
@@ -36,7 +36,7 @@ def _no_flash_attn_imports() -> Iterator[None]:
     the attention implementation does not need it, which breaks CPU-only setups.
     """
 
-    def filtered_get_imports(filename) -> List[str]:
+    def filtered_get_imports(filename) -> list[str]:
         imports = get_imports(filename)
         if str(filename).endswith("modeling_florence2.py") and "flash_attn" in imports:
             imports.remove("flash_attn")
