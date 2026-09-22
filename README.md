@@ -71,7 +71,9 @@ lower bounds — a 3-bedroom listing that only photographs one bedroom infers 1 
 | `listing_agent.py` | Photos -> room classification -> features -> listing JSON |
 | `train_florence2.py` | Fine-tuning loop for (photo, listing copy) pairs |
 | `build_training_data.py` | Turns the scraped corpus + image folders into training JSONL |
+| `label_photos.py` | Generates a per-photo training label from what each photo shows |
 | `evaluate_model.py` | Side-by-side captions from several checkpoints on a held-out split |
+| `eval_rooms.py` | Scores whether a checkpoint names the right room for held-out photos |
 | `data/listings_corpus.json` | 212 scraped listings; the target description structure |
 | `data/listing_images/` | Photos for 71 of those listings (542 images) |
 | `data/sample_property/` | Five photos of one apartment (exterior, living, kitchen, bedroom, bathroom) |
@@ -174,9 +176,38 @@ only 4.2440 -> 3.9754.
 
 That is a labelling problem, not a hyperparameter one: every photo of a listing is trained
 against the same whole-listing description, so a bathroom photo is asked to predict text about
-bedrooms and transport links, and the model learns to emit an average listing. **Use the tuned
-model for tone, not for facts** — facts should keep coming from `listing_agent.py`, which only
-emits features it can see in a photo.
+bedrooms and transport links, and the model learns to emit an average listing. **A checkpoint
+trained this way is good for tone only, not for facts.**
+
+### Per-photo labels: the fix
+
+`label_photos.py` builds one target per *photo* instead — the room plus the features that photo
+supports, written as agent copy, with nothing borrowed from the listing description:
+
+```bash
+python label_photos.py --data data/train/corpus.jsonl --out data/train/perphoto.jsonl
+python label_photos.py --data data/train/corpus_val.jsonl --out data/train/perphoto_val.jsonl
+
+python train_florence2.py --data data/train/perphoto.jsonl \
+    --val data/train/perphoto_val.jsonl --epochs 5 --lr 5e-6 --output checkpoints/perphoto
+
+python eval_rooms.py --data data/train/perphoto_val.jsonl \
+    --models checkpoints/perphoto checkpoints/corpus-v2
+```
+
+Each row keeps the `caption` and `objects` it came from, so changing the phrasing rules does not
+mean re-running the model — `--relabel data/train/perphoto.jsonl` rewrites the targets in place.
+
+On the same 440/102 split this trains to validation loss 0.2904, still falling at epoch 5 (no
+epoch-3 turn), and names the correct room for 85 of 102 held-out photos where the listing-level
+checkpoint names no room at all. A held-out bathroom photo now reads *"Full bathroom with a
+separate bathtub and shower, a vanity and mirror and tiled finishes"* instead of an invented
+suburb. Numbers and captions:
+[`examples/perphoto_training_report.md`](examples/perphoto_training_report.md).
+
+The ceiling is the label vocabulary: the labels are machine-generated, so the model inherits the
+keyword rules' blind spots and cannot say anything they have no phrase for. Reviewing a few
+hundred labels by hand is the next lift.
 
 Notes on the training loop:
 
@@ -188,8 +219,7 @@ Notes on the training loop:
   reloading fails with `only DaViT is supported for now`.
 - `build_training_data.py` uses one listing description as the target for every photo of that
   listing, truncated to `--max-chars`. That is the honest limitation of the corpus: it has
-  listing-level copy, not per-photo captions. Per-photo labels (like the five hand-written
-  ones) train a noticeably sharper model.
+  listing-level copy, not per-photo captions. Prefer `label_photos.py` output for training.
 
 ## How Florence-2 is used
 
@@ -220,10 +250,10 @@ Two implementation details are worth knowing before you change anything:
 
 ## Next steps
 
-- **Per-photo labels.** The biggest quality lever by far, and what the corpus run is blocked on:
-  label a few hundred photos individually (room type + one listing-style sentence) rather than
-  reusing listing-level copy. A first pass can be bootstrapped by captioning each photo with the
-  base model and having an agent edit the result.
+- **Human-reviewed labels.** `label_photos.py` generates the per-photo targets automatically, so
+  the model cannot exceed what the keyword rules can phrase. Correcting a few hundred labels by
+  hand (and adding vocabulary the rules lack) is now the biggest quality lever; `--relabel`
+  regenerates the rest without re-running the model.
 - **More listings with photos.** 71 of the 212 scraped listings have their images; the rest
   would roughly triple the training set again, though the v1 -> v2 jump suggests labels matter
   far more than volume.
