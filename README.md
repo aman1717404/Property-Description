@@ -73,7 +73,7 @@ lower bounds — a 3-bedroom listing that only photographs one bedroom infers 1 
 | `build_training_data.py` | Turns the scraped corpus + image folders into training JSONL |
 | `evaluate_model.py` | Side-by-side captions from several checkpoints on a held-out split |
 | `data/listings_corpus.json` | 212 scraped listings; the target description structure |
-| `data/listing_images/` | Photos for 26 of those listings (189 images) |
+| `data/listing_images/` | Photos for 71 of those listings (542 images) |
 | `data/sample_property/` | Five photos of one apartment (exterior, living, kitchen, bedroom, bathroom) |
 | `data/train/sample_property.jsonl` | Hand-written listing-style targets for those five photos |
 | `examples/` | Generated listing JSON and a before/after fine-tuning comparison |
@@ -166,10 +166,11 @@ by design: the tuned model adopts listing vocabulary but also invents details ("
 
 ### What the corpus run showed
 
-[`examples/corpus_training_report.md`](examples/corpus_training_report.md) has the full run on
-162 training / 27 validation photos. Validation loss bottoms out at epoch 3 (4.2440) while
-training loss keeps falling to 1.20, and the tuned captions read like agent copy but invent
-bedroom counts, suburbs and amenities.
+[`examples/corpus_training_report.md`](examples/corpus_training_report.md) has both runs. On
+440 training / 102 validation photos, validation loss bottoms out at epoch 3 (3.9754) while
+training loss keeps falling, and the tuned captions read like agent copy but invent bedroom
+counts, suburbs and amenities. Going from 162 to 440 training photos moved validation loss
+only 4.2440 -> 3.9754.
 
 That is a labelling problem, not a hyperparameter one: every photo of a listing is trained
 against the same whole-listing description, so a bathroom photo is asked to predict text about
@@ -223,8 +224,9 @@ Two implementation details are worth knowing before you change anything:
   label a few hundred photos individually (room type + one listing-style sentence) rather than
   reusing listing-level copy. A first pass can be bootstrapped by captioning each photo with the
   base model and having an agent edit the result.
-- **More listings with photos.** Only 26 of the 212 scraped listings have their images; pulling
-  the rest roughly multiplies the training set by eight.
+- **More listings with photos.** 71 of the 212 scraped listings have their images; the rest
+  would roughly triple the training set again, though the v1 -> v2 jump suggests labels matter
+  far more than volume.
 - **Replace the keyword rules.** `FEATURE_RULES` and `ROOM_KEYWORDS` in `listing_agent.py` are
   deliberately simple string matching over captions and `<OD>` labels. A small classifier on the
   DaViT embeddings, or `<CAPTION_TO_PHRASE_GROUNDING>` for specific features, would generalise
