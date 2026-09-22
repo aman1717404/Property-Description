@@ -1,0 +1,156 @@
+{
+  "property": {
+    "listing_url": "",
+    "description": "This well-presented apartment in Cremorne offers 1 bedroom, 1 bathroom across a light-filled, easy-care layout. The floorplan offers a bright living area, a well-appointed kitchen and generous bedroom accommodation.\n\nFeatures include:\nStainless steel dishwasher\nOven and cooktop\nRangehood over the cooktop\nAmple kitchen cabinetry and bench space\nFull-size fridge space\nSeparate bathtub and shower\nShower with glass screen\nVanity with mirror\nSpacious open-plan living area\nCarpeted floors to living and bedrooms\nTimber flooring\nTiled wet areas\nLarge windows with abundant natural light\nLeafy outlook\nNeutral, freshly painted interiors",
+    "address": {
+      "street": "",
+      "suburb": "Cremorne",
+      "state": "NSW",
+      "postcode": "2090",
+      "country": "Australia",
+      "city": "Cremorne"
+    },
+    "location": {
+      "city": "Cremorne",
+      "state": "NSW",
+      "country": "Australia"
+    },
+    "property_type": "Apartment",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "car_spaces": 0,
+    "furnished": false,
+    "bills_included": false,
+    "is_published": false,
+    "amenities": [
+      "Stainless steel dishwasher",
+      "Oven and cooktop",
+      "Rangehood over the cooktop",
+      "Ample kitchen cabinetry and bench space",
+      "Full-size fridge space",
+      "Separate bathtub and shower",
+      "Shower with glass screen",
+      "Vanity with mirror",
+      "Spacious open-plan living area",
+      "Carpeted floors to living and bedrooms",
+      "Timber flooring",
+      "Tiled wet areas",
+      "Large windows with abundant natural light",
+      "Leafy outlook",
+      "Neutral, freshly painted interiors"
+    ],
+    "images": {
+      "cover": "data/sample_property/01_exterior.jpg",
+      "other": [
+        "data/sample_property/02_living.jpg",
+        "data/sample_property/03_kitchen.jpg",
+        "data/sample_property/04_bedroom.jpg",
+        "data/sample_property/05_bathroom.jpg"
+      ]
+    },
+    "price": 750.0
+  },
+  "units": [
+    {
+      "listing_type": "room",
+      "name": "Room 1",
+      "price": 750.0,
+      "bond_amount": 3000.0,
+      "min_lease": 3,
+      "max_lease": 12,
+      "max_occupants": 1,
+      "status": "active",
+      "features": [
+        "Stainless steel dishwasher",
+        "Oven and cooktop",
+        "Rangehood over the cooktop",
+        "Ample kitchen cabinetry and bench space",
+        "Full-size fridge space",
+        "Separate bathtub and shower",
+        "Shower with glass screen",
+        "Vanity with mirror",
+        "Spacious open-plan living area",
+        "Carpeted floors to living and bedrooms",
+        "Timber flooring",
+        "Tiled wet areas",
+        "Large windows with abundant natural light",
+        "Leafy outlook",
+        "Neutral, freshly painted interiors"
+      ]
+    }
+  ],
+  "imageFolder": "sample_property",
+  "image_analysis": [
+    {
+      "path": "data/sample_property/01_exterior.jpg",
+      "room": "exterior",
+      "caption": "The image shows a two-story brick building with a flat roof. The building is surrounded by trees and shrubs, and there is a pathway leading up to the entrance. The sky is blue and the weather appears to be sunny. There are several windows on the building, and a palm tree can be seen in the foreground. The image is slightly blurred, giving it a dreamy quality.",
+      "objects": [
+        "house",
+        "window"
+      ]
+    },
+    {
+      "path": "data/sample_property/02_living.jpg",
+      "room": "living",
+      "caption": "The image shows a modern living room with a large window on the right side. The room has a beige carpeted floor and white walls. There is a gray sofa with colorful throw pillows in the center of the room. On the left side, there is a small side table with a lamp on it. In front of the sofa, there are two round glass coffee tables. A red area rug with a geometric design is placed on the floor next to the sofa. A flat-screen TV is mounted on a white cabinet on the wall. The ceiling has a recessed light fixture.",
+      "objects": [
+        "carpet",
+        "coffee table",
+        "cushion",
+        "desk",
+        "lamp",
+        "pillow",
+        "studio couch",
+        "table"
+      ]
+    },
+    {
+      "path": "data/sample_property/03_kitchen.jpg",
+      "room": "kitchen",
+      "caption": "This image shows a modern kitchen with white cabinets and stainless steel appliances. The kitchen has a large window above the sink, allowing natural light to enter the space. The countertop is made of white subway tiles, and there is a stainless steel dishwasher and oven on the right side of the image. On the left side, there are white cabinets with silver handles. The floor is wooden, and the walls are painted white. The overall color scheme of the kitchen is clean and minimalistic.",
+      "objects": [
+        "cabinetry",
+        "dishwasher",
+        "door handle",
+        "drawer",
+        "faucet",
+        "fume hood",
+        "gas stove",
+        "knob",
+        "oven",
+        "power plugs and sockets",
+        "refrigerator",
+        "sink",
+        "vent"
+      ]
+    },
+    {
+      "path": "data/sample_property/04_bedroom.jpg",
+      "room": "bedroom",
+      "caption": "The image shows a bedroom with a single bed in the center. The bed has a black metal frame and is covered with a colorful quilt with a floral pattern. There are two nightstands on either side of the bed with drawers. The walls are painted white and there is a large window on the right wall that offers a view of trees outside. The floor is covered in beige carpet. The room appears to be clean and well-maintained.",
+      "objects": [
+        "bed",
+        "desk",
+        "drawer",
+        "nightstand",
+        "pillow"
+      ]
+    },
+    {
+      "path": "data/sample_property/05_bathroom.jpg",
+      "room": "bathroom",
+      "caption": "The image shows a modern bathroom with a white and light blue color scheme. The walls are covered in light blue tiles, and the floor is covered with a black and white checkered pattern. On the left side of the image, there is a white bathtub with a glass door, and on the right side, there are two white sinks with silver faucets and a large mirror above them. The bathroom also has a white toilet and a window above the sink. The overall style of the bathroom is clean and minimalistic.",
+      "objects": [
+        "bathtub",
+        "cistern",
+        "faucet",
+        "mirror",
+        "sink",
+        "toilet",
+        "towel rack",
+        "vent"
+      ]
+    }
+  ]
+}
