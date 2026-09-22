@@ -29,7 +29,7 @@ def _device_and_dtype() -> tuple[str, torch.dtype]:
 
 
 @contextmanager
-def _no_flash_attn_imports() -> Iterator[None]:
+def no_flash_attn_imports() -> Iterator[None]:
     """Drop ``flash_attn`` from the remote code's import checks.
 
     Florence-2's modeling file imports ``flash_attn`` unconditionally even when
@@ -48,11 +48,15 @@ def _no_flash_attn_imports() -> Iterator[None]:
         yield
 
 
-@lru_cache(maxsize=1)
+@lru_cache(maxsize=4)
 def load_model(model_id: str = MODEL_ID):
-    """Load the Florence-2 model and processor once per process."""
+    """Load a Florence-2 model and processor once per process.
+
+    ``model_id`` may be a Hugging Face id or a local directory produced by
+    ``train_florence2.py``.
+    """
     device, dtype = _device_and_dtype()
-    with _no_flash_attn_imports():
+    with no_flash_attn_imports():
         model = AutoModelForCausalLM.from_pretrained(
             model_id, torch_dtype=dtype, trust_remote_code=True
         ).to(device)
@@ -61,12 +65,26 @@ def load_model(model_id: str = MODEL_ID):
     return model, processor, device, dtype
 
 
-def describe_property(image_path: str, max_new_tokens: int = 1024) -> str:
-    """Return a detailed description of the property shown in ``image_path``."""
-    model, processor, device, dtype = load_model()
-    image = Image.open(image_path).convert("RGB")
+def run_task(
+    image: Image.Image | str,
+    task: str = TASK_PROMPT,
+    text_input: str | None = None,
+    model_id: str = MODEL_ID,
+    max_new_tokens: int = 1024,
+    num_beams: int = 3,
+):
+    """Run any Florence-2 task token against an image and return the parsed result.
 
-    inputs = processor(text=TASK_PROMPT, images=image, return_tensors="pt")
+    ``<MORE_DETAILED_CAPTION>`` returns a string, ``<OD>`` returns a dict of
+    boxes and labels, and so on -- the shape follows the task token.
+    """
+    model, processor, device, dtype = load_model(model_id)
+    if isinstance(image, str):
+        image = Image.open(image)
+    image = image.convert("RGB")
+
+    prompt = task if text_input is None else task + text_input
+    inputs = processor(text=prompt, images=image, return_tensors="pt")
     inputs = {
         key: value.to(device=device, dtype=dtype if value.is_floating_point() else value.dtype)
         for key, value in inputs.items()
@@ -77,26 +95,42 @@ def describe_property(image_path: str, max_new_tokens: int = 1024) -> str:
             input_ids=inputs["input_ids"],
             pixel_values=inputs["pixel_values"],
             max_new_tokens=max_new_tokens,
-            num_beams=3,
+            num_beams=num_beams,
             do_sample=False,
         )
 
     generated_text = processor.batch_decode(generated_ids, skip_special_tokens=False)[0]
     parsed = processor.post_process_generation(
-        generated_text, task=TASK_PROMPT, image_size=(image.width, image.height)
+        generated_text, task=task, image_size=(image.width, image.height)
     )
-    return parsed[TASK_PROMPT].strip()
+    return parsed[task]
+
+
+def describe_property(
+    image_path: str, max_new_tokens: int = 1024, model_id: str = MODEL_ID
+) -> str:
+    """Return a detailed description of the property shown in ``image_path``."""
+    caption = run_task(
+        image_path,
+        TASK_PROMPT,
+        model_id=model_id,
+        max_new_tokens=max_new_tokens,
+    )
+    return str(caption).strip()
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Describe a real estate property image.")
     parser.add_argument("image", help="Path to the property image")
+    parser.add_argument("--model", default=MODEL_ID, help="Model id or local checkpoint")
     parser.add_argument(
         "--max-new-tokens", type=int, default=1024, help="Generation length cap"
     )
     args = parser.parse_args()
 
-    description = describe_property(args.image, max_new_tokens=args.max_new_tokens)
+    description = describe_property(
+        args.image, max_new_tokens=args.max_new_tokens, model_id=args.model
+    )
     print(description)
     return 0
 
