@@ -1,0 +1,154 @@
+{
+  "property": {
+    "listing_url": "",
+    "description": "This well-presented apartment in Cremorne Point offers 1 bedroom, 1 bathroom across a light-filled, easy-care layout. The floorplan offers a bright living area, generous bedroom accommodation and a full bathroom.\n\nFeatures include:\nOven and cooktop\nAmple kitchen cabinetry and bench space\nSeparate bathtub and shower\nShower with glass screen\nVanity with mirror\nSpacious open-plan living area\nSeparate dining area\nTimber flooring\nTiled wet areas\nLarge windows with abundant natural light\nLeafy outlook\nNeutral, freshly painted interiors",
+    "address": {
+      "street": "",
+      "suburb": "Cremorne Point",
+      "state": "NSW",
+      "postcode": "",
+      "country": "Australia",
+      "city": "Cremorne Point"
+    },
+    "location": {
+      "city": "Cremorne Point",
+      "state": "NSW",
+      "country": "Australia"
+    },
+    "property_type": "Apartment",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "car_spaces": 0,
+    "furnished": false,
+    "bills_included": false,
+    "is_published": false,
+    "amenities": [
+      "Oven and cooktop",
+      "Ample kitchen cabinetry and bench space",
+      "Separate bathtub and shower",
+      "Shower with glass screen",
+      "Vanity with mirror",
+      "Spacious open-plan living area",
+      "Separate dining area",
+      "Timber flooring",
+      "Tiled wet areas",
+      "Large windows with abundant natural light",
+      "Leafy outlook",
+      "Neutral, freshly painted interiors"
+    ],
+    "images": {
+      "cover": "data/listing_images/images/38746/image_005_800x600.jpg",
+      "other": [
+        "data/listing_images/images/38746/image_001_800x600.jpg",
+        "data/listing_images/images/38746/image_002_800x600.jpg",
+        "data/listing_images/images/38746/image_003_800x600.jpg",
+        "data/listing_images/images/38746/image_004_800x600.jpg"
+      ]
+    },
+    "price": null
+  },
+  "units": [
+    {
+      "listing_type": "room",
+      "name": "Room 1",
+      "price": null,
+      "bond_amount": null,
+      "min_lease": 3,
+      "max_lease": 12,
+      "max_occupants": 1,
+      "status": "active",
+      "features": [
+        "Oven and cooktop",
+        "Ample kitchen cabinetry and bench space",
+        "Separate bathtub and shower",
+        "Shower with glass screen",
+        "Vanity with mirror",
+        "Spacious open-plan living area",
+        "Separate dining area",
+        "Timber flooring",
+        "Tiled wet areas",
+        "Large windows with abundant natural light",
+        "Leafy outlook",
+        "Neutral, freshly painted interiors"
+      ]
+    }
+  ],
+  "imageFolder": "38746",
+  "image_analysis": [
+    {
+      "path": "data/listing_images/images/38746/image_001_800x600.jpg",
+      "room": "living",
+      "caption": "The image shows a modern living room with a large window on the right side. The window offers a view of the greenery outside. The room is furnished with a beige sofa with blue and white throw pillows, a round wooden coffee table with a vase of white flowers, and a small dining table with four chairs. The walls are painted in a light beige color and there is a large painting hanging above the sofa. The floor is covered with a gray area rug. The overall style of the room is minimal and contemporary.",
+      "objects": [
+        "book",
+        "chair",
+        "coffee table",
+        "cushion",
+        "flowerpot",
+        "house",
+        "houseplant",
+        "painting",
+        "pillow",
+        "studio couch",
+        "vase",
+        "vent"
+      ]
+    },
+    {
+      "path": "data/listing_images/images/38746/image_002_800x600.jpg",
+      "room": "bedroom",
+      "caption": "The image shows a modern and spacious bedroom with a large window that offers a beautiful view of the ocean. The room has a white bed with a gray and white striped comforter and several blue and white throw pillows. On the right side of the bed, there is a white nightstand with a lamp and a blue vase. The walls are painted in a light beige color and the floor is covered with a beige rug. There is a small armchair with a black and white patterned cushion next to the bed. The window has gray curtains and a white frame with a pink and blue abstract painting hanging on it. The overall style of the room is minimalistic and contemporary.",
+      "objects": [
+        "bed",
+        "chair",
+        "curtain",
+        "house",
+        "lamp",
+        "nightstand",
+        "pillow",
+        "window"
+      ]
+    },
+    {
+      "path": "data/listing_images/images/38746/image_003_800x600.jpg",
+      "room": "bathroom",
+      "caption": "The image shows a modern bathroom with a pink bathtub and a walk-in shower. The bathtub is enclosed by a glass door and has a pink toilet in the corner. The walls are covered in light blue tiles and there is a window above the bathtub with a view of trees and greenery outside. On the right side of the image, there are white cabinets and a white countertop with a sink and a mirror above it. The floor is covered in small white tiles with a geometric pattern. A light fixture hangs from the ceiling. The overall color scheme of the bathroom is light blue and white.",
+      "objects": [
+        "bathtub",
+        "bottle",
+        "faucet",
+        "houseplant",
+        "shower cap",
+        "sink",
+        "toilet",
+        "towel rack",
+        "vase"
+      ]
+    },
+    {
+      "path": "data/listing_images/images/38746/image_004_800x600.jpg",
+      "room": "kitchen",
+      "caption": "The image shows a modern kitchen with light-colored wooden cabinets and white countertops. The kitchen has a large window on the left side, allowing natural light to enter the space. On the right side, there is a white gas stove with four burners and a white oven. Above the stove, there are two white cabinets with a sink and a window above it. The cabinets are made of light wood and have a simple design with a curved shape. The countertop is made of white tiles and has a small potted plant on it. There is a sink with a stainless steel faucet and a countertop with a few items on it, including a vase with a plant and a bowl of fruit. The floor is tiled in a light beige color. The walls are painted white and the ceiling is painted a light color.",
+      "objects": [
+        "cabinetry",
+        "coffee cup",
+        "drawer",
+        "flowerpot",
+        "hinge",
+        "houseplant",
+        "knob",
+        "oven",
+        "sink"
+      ]
+    },
+    {
+      "path": "data/listing_images/images/38746/image_005_800x600.jpg",
+      "room": "exterior",
+      "caption": "The image shows a view of a residential area from a high vantage point. The sky is blue and clear, and the horizon is visible in the distance. In the foreground, there are several houses with red tiled roofs, and in the background, there is a body of water. The houses are surrounded by trees and greenery, and there are a few buildings visible on the left side of the image. The overall scene is peaceful and serene.",
+      "objects": [
+        "house",
+        "window"
+      ]
+    }
+  ]
+}

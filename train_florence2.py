@@ -11,8 +11,12 @@ Training data is a JSONL file, one example per line:
      "suffix": "Renovated u-shaped kitchen with stone benchtops ..."}
 
 Usage:
-    python train_florence2.py --data data/train/sample_property.jsonl \
-        --model microsoft/Florence-2-base-ft --epochs 6 --output checkpoints/demo
+    python train_florence2.py --data data/train/corpus.jsonl \
+        --val data/train/corpus_val.jsonl --epochs 4 --output checkpoints/corpus
+
+With ``--val`` the checkpoint written is the one with the lowest validation
+loss, not the last epoch: on a few hundred photos the training loss keeps
+falling long after the model starts memorising listings.
 """
 
 from __future__ import annotations
@@ -107,6 +111,21 @@ def make_collate_fn(processor):
     return collate
 
 
+@torch.inference_mode()
+def evaluate(model, loader, device, dtype) -> float:
+    model.eval()
+    total = 0.0
+    for inputs, labels in loader:
+        outputs = model(
+            input_ids=inputs["input_ids"].to(device),
+            pixel_values=inputs["pixel_values"].to(device, dtype=dtype),
+            labels=labels.to(device),
+        )
+        total += outputs.loss.item()
+    model.train()
+    return total / len(loader)
+
+
 def train(
     data_path: str,
     model_id: str = DEFAULT_TRAIN_MODEL,
@@ -115,6 +134,7 @@ def train(
     batch_size: int = 1,
     lr: float = 1e-6,
     freeze_vision: bool = True,
+    val_path: str | None = None,
 ) -> str:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     dtype = torch.float32  # fp16 training is unstable without a GradScaler.
@@ -140,11 +160,23 @@ def train(
         collate_fn=make_collate_fn(processor),
     )
 
+    val_loader = None
+    if val_path:
+        val_loader = DataLoader(
+            ListingCaptionDataset(val_path),
+            batch_size=batch_size,
+            shuffle=False,
+            collate_fn=make_collate_fn(processor),
+        )
+
     trainable = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(trainable, lr=lr)
     scheduler = get_linear_schedule_with_warmup(
         optimizer, num_warmup_steps=0, num_training_steps=epochs * len(loader)
     )
+
+    output = Path(output_dir)
+    best_val = float("inf")
 
     model.train()
     for epoch in range(1, epochs + 1):
@@ -163,20 +195,37 @@ def train(
             optimizer.zero_grad()
             epoch_loss += outputs.loss.item()
 
-        print(f"epoch {epoch}/{epochs}  loss {epoch_loss / len(loader):.4f}", flush=True)
+        message = f"epoch {epoch}/{epochs}  loss {epoch_loss / len(loader):.4f}"
+        if val_loader is not None:
+            val_loss = evaluate(model, val_loader, device, dtype)
+            message += f"  val_loss {val_loss:.4f}"
+            if val_loss < best_val:
+                best_val = val_loss
+                _save(model, processor, output)
+                message += "  (saved)"
+        print(message, flush=True)
 
-    output = Path(output_dir)
+    if val_loader is None:
+        _save(model, processor, output)
+    print(f"saved fine-tuned model to {output}")
+    return str(output)
+
+
+def _save(model, processor, output: Path) -> None:
     output.mkdir(parents=True, exist_ok=True)
     model.save_pretrained(output)
     processor.save_pretrained(output)
     _restore_vision_model_type(output / "config.json")
-    print(f"saved fine-tuned model to {output}")
-    return str(output)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--data", default="data/train/sample_property.jsonl")
+    parser.add_argument(
+        "--val",
+        default=None,
+        help="Held-out JSONL; the best-scoring epoch is the one saved",
+    )
     parser.add_argument("--model", default=DEFAULT_TRAIN_MODEL)
     parser.add_argument("--output", default="checkpoints/florence2-listings")
     parser.add_argument("--epochs", type=int, default=6)
@@ -197,6 +246,7 @@ def main() -> int:
         batch_size=args.batch_size,
         lr=args.lr,
         freeze_vision=not args.train_vision_tower,
+        val_path=args.val,
     )
     return 0
 
