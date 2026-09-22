@@ -71,7 +71,9 @@ lower bounds — a 3-bedroom listing that only photographs one bedroom infers 1 
 | `listing_agent.py` | Photos -> room classification -> features -> listing JSON |
 | `train_florence2.py` | Fine-tuning loop for (photo, listing copy) pairs |
 | `build_training_data.py` | Turns the scraped corpus + image folders into training JSONL |
-| `data/listings_corpus.json` | 73 scraped listings; the target description structure |
+| `evaluate_model.py` | Side-by-side captions from several checkpoints on a held-out split |
+| `data/listings_corpus.json` | 212 scraped listings; the target description structure |
+| `data/listing_images/` | Photos for 26 of those listings (189 images) |
 | `data/sample_property/` | Five photos of one apartment (exterior, living, kitchen, bedroom, bathroom) |
 | `data/train/sample_property.jsonl` | Hand-written listing-style targets for those five photos |
 | `examples/` | Generated listing JSON and a before/after fine-tuning comparison |
@@ -123,17 +125,27 @@ The base model captions a kitchen as "the stove is black"; agents write "stainle
 gas cooktop, rangehood and dishwasher". Fine-tuning closes that gap.
 
 ```bash
-# 1. Build training pairs from the scraped corpus (needs the scraper's image folders).
-python build_training_data.py --images-root /path/to/prop_scraper/output \
-    --out data/train/corpus.jsonl
+# 1. Build training pairs, holding out 20% of listings for validation.
+python build_training_data.py --images-root data/listing_images \
+    --out data/train/corpus.jsonl --val-split 0.2
 
-# 2. Fine-tune. Frozen vision tower, language decoder only.
+# 2. Fine-tune. Frozen vision tower, language decoder only. The epoch with the
+#    lowest validation loss is the one written to --output.
 python train_florence2.py --data data/train/corpus.jsonl \
-    --model microsoft/Florence-2-base-ft --epochs 3 --output checkpoints/listings
+    --val data/train/corpus_val.jsonl --epochs 8 --lr 5e-6 \
+    --output checkpoints/listings
 
-# 3. Use the checkpoint anywhere the base model is used.
+# 3. Compare checkpoints on held-out photos.
+python evaluate_model.py --data data/train/corpus_val.jsonl \
+    --models microsoft/Florence-2-base-ft checkpoints/listings
+
+# 4. Use the checkpoint anywhere the base model is used.
 python listing_agent.py data/sample_property --model checkpoints/listings
 ```
+
+The split is by *listing*, not by image: all photos of a property share one
+caption target, so splitting by image would put the validation targets in the
+training set.
 
 Training data is JSONL, one row per photo:
 
@@ -151,7 +163,19 @@ python train_florence2.py --data data/train/sample_property.jsonl --epochs 8 --l
 Before/after captions from that run are in
 [`examples/finetune_before_after.md`](examples/finetune_before_after.md). Five examples overfit
 by design: the tuned model adopts listing vocabulary but also invents details ("four levels").
-Use the full corpus, hold out a validation split, and keep a human review step.
+
+### What the corpus run showed
+
+[`examples/corpus_training_report.md`](examples/corpus_training_report.md) has the full run on
+162 training / 27 validation photos. Validation loss bottoms out at epoch 3 (4.2440) while
+training loss keeps falling to 1.20, and the tuned captions read like agent copy but invent
+bedroom counts, suburbs and amenities.
+
+That is a labelling problem, not a hyperparameter one: every photo of a listing is trained
+against the same whole-listing description, so a bathroom photo is asked to predict text about
+bedrooms and transport links, and the model learns to emit an average listing. **Use the tuned
+model for tone, not for facts** — facts should keep coming from `listing_agent.py`, which only
+emits features it can see in a photo.
 
 Notes on the training loop:
 
@@ -195,11 +219,12 @@ Two implementation details are worth knowing before you change anything:
 
 ## Next steps
 
-- **Train on the full corpus.** `data/listings_corpus.json` has 73 listings but the image files
-  live on the scraper machine; wire `build_training_data.py` to wherever those folders are
-  stored and run a real fine-tune with a validation split.
-- **Per-photo labels.** The biggest quality lever: label a few hundred photos individually
-  (room type + one listing-style sentence) rather than reusing listing-level copy.
+- **Per-photo labels.** The biggest quality lever by far, and what the corpus run is blocked on:
+  label a few hundred photos individually (room type + one listing-style sentence) rather than
+  reusing listing-level copy. A first pass can be bootstrapped by captioning each photo with the
+  base model and having an agent edit the result.
+- **More listings with photos.** Only 26 of the 212 scraped listings have their images; pulling
+  the rest roughly multiplies the training set by eight.
 - **Replace the keyword rules.** `FEATURE_RULES` and `ROOM_KEYWORDS` in `listing_agent.py` are
   deliberately simple string matching over captions and `<OD>` labels. A small classifier on the
   DaViT embeddings, or `<CAPTION_TO_PHRASE_GROUNDING>` for specific features, would generalise
